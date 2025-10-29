@@ -1,0 +1,1 @@
+Add your trained model file named 'rf_phishing_model.joblib' to this folder before running the app.\nIf you don't have one, use the Colab training notebook to create it.

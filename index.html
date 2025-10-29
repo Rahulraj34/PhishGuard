@@ -1,0 +1,76 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>⚡ Advanced Phishing Detector</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <!-- animated background canvas (z-index 0) -->
+  <canvas id="bg-canvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+
+  <!-- main UI container (above background) -->
+  <div class="container">
+    <header class="header">
+      <h1 class="title">⚡ Advanced Phishing Detector</h1>
+      <p class="subtitle">Paste one or more URLs (comma or newline separated). Click check — get instant verdict + reasons.</p>
+    </header>
+
+    <main class="main-card">
+      <form method="POST" class="check-form">
+        <textarea name="urls" id="urls" placeholder="https://example.com , https://srec.ac.in/" class="input-area" required></textarea>
+        <button class="btn-check" type="submit">Check URLs</button>
+      </form>
+
+      {% if error %}
+        <div class="alert warn">{{ error }}</div>
+      {% endif %}
+
+      {% if results %}
+        <div class="results-header">
+          <h3>Results ({{ results|length }})</h3>
+        </div>
+
+        <div class="table-wrap">
+          <table class="results-table">
+            <thead><tr>
+              <th>URL</th><th>Verdict</th><th>Prob</th><th>Suspicious features</th>
+            </tr></thead>
+            <tbody>
+            {% for r in results %}
+              <tr class="row-{{ loop.index0 }}">
+                <td class="mono">{{ r.input_url }}</td>
+                <td>
+                  {% if r.label==1 %}
+                    <span class="badge badge-danger">PHISHING</span>
+                  {% elif r.label==0 %}
+                    <span class="badge badge-success">SAFE</span>
+                  {% else %}
+                    <span class="badge badge-neutral">N/A</span>
+                  {% endif %}
+                </td>
+                <td>{{ (r.prob | round(3)) if r.prob is not none else '—' }}</td>
+                <td>
+                  {% for k,v in r.features.items() %}
+                    {% if k in ['suspicious_words','has_ip','count_dash','count_dot'] and v %}
+                      <span class="feat">{{ k }}:{{ v }}</span>
+                    {% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+
+    </main>
+  </div>
+
+ 
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
